@@ -4,6 +4,7 @@
  */
 package org.uv.programa09.controller;
 
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.CrudRepository;
 
 
@@ -11,6 +12,6 @@ import org.springframework.data.repository.CrudRepository;
  *
  * @author emili
  */
-public interface RepositoryEmpleado extends CrudRepository<Empleado, Long>  {
+public interface RepositoryEmpleado extends JpaRepository<Empleado, Long>  {
     
 }

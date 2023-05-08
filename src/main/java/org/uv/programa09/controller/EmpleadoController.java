@@ -1,15 +1,16 @@
 package org.uv.programa09.controller;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /*
@@ -21,75 +22,64 @@ import org.springframework.web.bind.annotation.RestController;
  * @author Itzel
  */
 @RestController
-@RequestMapping("/")
 public class EmpleadoController {
 
     @Autowired
-    private RepositoryEmpleado repositoryEmpleado;
-    
+    RepositoryEmpleado repositoryEmpleado;
+
     @GetMapping("/msg")
-    public String holamundo(){
+    public String holamundo() {
         return "Hola mundo";
     }
-    
-    @GetMapping("/empleados/{id}")
-    public DTOEmpleado obtenerEmpleado(@PathVariable("id") long id){
-        DTOEmpleado emp=null;
-        if (id == 10){
-        emp.setClave(10);
-        emp.setNombre("Sag");
-        emp.setDireccion("Av 1");
-        emp.setTelefono("1234");
+
+    @GetMapping("/empleado")
+    public List<Empleado> listTodo() {
+        return repositoryEmpleado.findAll();
+    }
+
+    @GetMapping("/empleado/{id}")
+    public ResponseEntity<Empleado> byId(@PathVariable("id") long id) {
+        Optional<Empleado> opt = repositoryEmpleado.findById(id);
+
+        if (opt.isPresent()) {
+            return new ResponseEntity<>(opt.get(), HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-        return emp;
+    }
+
+    //guardarregistro
+    @PostMapping("/empleado")
+    public ResponseEntity<Empleado> addEmpleado(@RequestBody DTOEmpleado empleadoDTO) {
+        Empleado empleado = new Empleado(empleadoDTO);
+        try {
+            Empleado eMpleado = repositoryEmpleado.save(empleado);
+            return new ResponseEntity<>(eMpleado, HttpStatus.CREATED);
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @DeleteMapping("/empleado/{id}")
+    public ResponseEntity<HttpStatus> deleteVisit(@PathVariable Long id) {
+        try {
+            repositoryEmpleado.deleteById(id);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @PutMapping("/empleado/{id}")
+    public ResponseEntity<Empleado> updateEmpleado(@PathVariable("id") long id, @RequestBody DTOEmpleado empleadoDTO) {
+        Empleado empleado = new Empleado(empleadoDTO);  
+        Optional<Empleado> empleadoData = repositoryEmpleado.findById(id);
+
+        if (empleadoData.isPresent()) {
+            return new ResponseEntity<>(repositoryEmpleado.saveAndFlush(empleado), HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
     }
     
-    @GetMapping("/empleados")
-    public List<DTOEmpleado> obtenerTodosLosEmpleado(){
-        List<DTOEmpleado> lstEmpleados=new ArrayList<>();
-        DTOEmpleado emp1= new  DTOEmpleado();
-        emp1.setClave(10);
-        emp1.setNombre("Sag");
-        emp1.setDireccion("Av 1");
-        emp1.setTelefono("1234");
-        
-        lstEmpleados.add(emp1);
-        DTOEmpleado emp2= new DTOEmpleado();
-        emp2.setClave(12);
-        emp2.setNombre("Sag2");
-        emp2.setDireccion("Av 1");
-        emp2.setTelefono("1234");
-        
-        return lstEmpleados;
-    }
-    //guardarregistro
-    @PostMapping("/empleados")
-    public DTOEmpleado createEmpleado(@RequestBody DTOEmpleado empleadoDTO){
-        Empleado empleadopojo= new Empleado();
-        empleadopojo.setNombre(empleadoDTO.getNombre());
-        empleadopojo.setDireccion(empleadoDTO.getDireccion());
-        empleadopojo.setTelefono(empleadoDTO.getTelefono());
-        
-        Empleado empleadopojoNew=repositoryEmpleado.save(empleadopojo);
-        
-        DTOEmpleado empleadoDTONew=new DTOEmpleado();
-        empleadoDTONew.setClave(empleadopojoNew.getId());
-        empleadoDTONew.setNombre(empleadopojoNew.getNombre());
-        empleadoDTONew.setDireccion(empleadopojoNew.getDireccion());
-        empleadoDTONew.setTelefono(empleadopojoNew.getTelefono());
-        return empleadoDTONew;
-  }
-    //update
-    @PutMapping("/empleados/{id}")
-  public DTOEmpleado modificarEmpleado(@PathVariable("id")Long id,
-          @RequestBody DTOEmpleado empleado){
-      
-      return empleado;
-      
-  }
-    //delete
-    @DeleteMapping("/empleados")
-    public void borrarEmpleado(@PathVariable("id") Long id){
-        return ;
-    }
 }

@@ -32,6 +32,17 @@ public class Empleado {
     @Column(name="telefono")
     String telefono;
     
+    public Empleado(DTOEmpleado emp) {
+        this.clave = emp.getClave();
+        this.nombre = emp.getNombre();
+        this.telefono = emp.getTelefono();
+        this.direccion = emp.getDireccion();
+    }
+
+    public Empleado() {
+    }
+    
+    
     public long getId() {
     return clave;
   }
